@@ -144,13 +144,28 @@ st.header("3. Quantitativa × Qualitativa (ANOVA)")
 qt = st.selectbox("Variável quantitativa", NUM_COLS, index=0)
 ql = st.selectbox("Variável qualitativa", QUAL_COLS, index=1)
 
-grupos = [g[qt].dropna().values for _, g in df.groupby(ql)]
+# Excluir grupos com n = 1 (ex.: DF tem apenas Brasília) — ANOVA e boxplot
+grupos_contagem = df.groupby(ql)[qt].count()
+grupos_validos = grupos_contagem[grupos_contagem > 1].index
+excluidos = grupos_contagem[grupos_contagem <= 1].index.tolist()
+
+df_anova = df[df[ql].isin(grupos_validos)]
+
+if excluidos:
+    st.caption(
+        f"⚠️ Grupo(s) excluídos do ANOVA e do boxplot por terem apenas 1 observação "
+        f"(sem variância): **{', '.join(excluidos)}**. "
+        "Um grupo com n = 1 viola a premissa do ANOVA e não permite interpretar "
+        "mediana, quartis ou dispersão em boxplot."
+    )
+
+grupos = [g[qt].dropna().values for _, g in df_anova.groupby(ql)]
 f_stat, p_val = stats.f_oneway(*grupos)
 
-# Eta² (tamanho de efeito)
-grand_mean = df[qt].mean()
+# Eta² calculado sobre o subconjunto válido
+grand_mean = df_anova[qt].mean()
 ss_between = sum(len(g) * (np.mean(g) - grand_mean) ** 2 for g in grupos)
-ss_total = ((df[qt] - grand_mean) ** 2).sum()
+ss_total = ((df_anova[qt] - grand_mean) ** 2).sum()
 eta2 = ss_between / ss_total if ss_total else np.nan
 
 c1, c2, c3 = st.columns(3)
@@ -158,19 +173,10 @@ c1.metric("Estatística F", f"{f_stat:.3f}")
 c2.metric("p-valor", f"{p_val:.4f}")
 c3.metric("η² (eta²)", f"{eta2:.3f}")
 
-fig3 = px.box(df, x=ql, y=qt, color=ql, points="all",
+fig3 = px.box(df_anova, x=ql, y=qt, color=ql, points="all",
               title=f"{qt} por {ql} (ANOVA p={p_val:.4f})",
               hover_data=["nome_municipio", "uf"])
 st.plotly_chart(fig3, use_container_width=True)
-
-if ql == "uf" and "DF" in df["uf"].values:
-    n_df = (df["uf"] == "DF").sum()
-    st.caption(
-        f"⚠️ **Atenção:** o Distrito Federal corresponde a **{n_df} município** "
-        "na RIDE-DF (Brasília). Um boxplot com n = 1 não tem dispersão — "
-        "o ponto exibido é apenas o valor único da observação, sem interpretação "
-        "de mediana, quartis ou outliers."
-    )
 
 st.markdown(
     """
@@ -180,7 +186,7 @@ st.markdown(
 """
 )
 
-# Tabela resumo por grupo
+# Tabela resumo por grupo (apenas grupos válidos)
 st.subheader(f"Resumo de `{qt}` por `{ql}`")
-resumo = df.groupby(ql)[qt].agg(["count", "mean", "median", "std", "min", "max"]).round(2)
+resumo = df_anova.groupby(ql)[qt].agg(["count", "mean", "median", "std", "min", "max"]).round(2)
 st.dataframe(resumo, use_container_width=True)
