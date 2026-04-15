@@ -122,10 +122,30 @@ else:
 # 5. Histogramas
 # --------------------------------------------------------------
 st.header("5. Distribuição das Variáveis")
+
+# Regra de Sturges: k = ceil(log2(n) + 1) — mais adequado para n=34
+_n_bins = int(np.ceil(np.log2(len(df)) + 1))
+
 cols = st.columns(2)
 for i, c in enumerate(NUM_COLS):
-    fig = px.histogram(df, x=c, nbins=20, title=c, marginal="box")
+    fig = px.histogram(
+        df, x=c,
+        nbins=_n_bins,
+        title=c,
+        marginal="box",
+        labels={c: c, "count": "Frequência"},
+    )
+    fig.update_traces(
+        marker_line_width=1,
+        marker_line_color="rgba(0,0,0,0.45)",
+    )
+    fig.update_layout(bargap=0.05)
     cols[i % 2].plotly_chart(fig, use_container_width=True)
+
+st.caption(
+    f"Bins calculados pela regra de Sturges: k = ⌈log₂(n) + 1⌉ = {_n_bins} "
+    f"(n = {len(df)} municípios). Valores em R\$ mil (IBGE)."
+)
 
 # --------------------------------------------------------------
 # 6. Anomalias lógicas / validações de integridade

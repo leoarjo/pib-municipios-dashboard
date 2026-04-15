@@ -93,14 +93,25 @@ with col3:
 st.divider()
 
 st.subheader("Amostra dos dados (ano selecionado)")
+
+_MONEY_COLS = [
+    "vl_agropecuaria", "vl_industria", "vl_servicos",
+    "vl_administracao", "vl_bruto_total", "vl_pib", "vl_pib_per_capta",
+]
+
+def _fmt_br(v):
+    """Formata número no padrão pt-BR (ponto=milhar, vírgula=decimal)."""
+    if v is None or (isinstance(v, float) and pd.isna(v)):
+        return ""
+    s = f"{v:,.3f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return s
+
+_sample = df_ano[
+    ["ano", "codigo_municipio_dv", "nome_municipio", "uf"] + _MONEY_COLS
+].reset_index(drop=True)
+
 st.dataframe(
-    df_ano[
-        [
-            "ano", "codigo_municipio_dv", "nome_municipio", "uf",
-            "vl_agropecuaria", "vl_industria", "vl_servicos",
-            "vl_administracao", "vl_bruto_total", "vl_pib", "vl_pib_per_capta",
-        ]
-    ].reset_index(drop=True),
+    _sample.style.format({c: _fmt_br for c in _MONEY_COLS}),
     use_container_width=True,
     height=380,
 )
