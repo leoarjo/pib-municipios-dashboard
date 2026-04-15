@@ -6,6 +6,7 @@ Estrutura:
     - Parte 1 : Captação e avaliação da qualidade dos dados
     - Parte 2 : Painéis, mapas, correlações/associações e modelos de regressão
 """
+import pandas as pd
 import streamlit as st
 
 from db import get_available_years, get_pib_ride, get_ride_df_municipios
