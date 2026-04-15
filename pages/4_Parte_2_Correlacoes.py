@@ -27,13 +27,24 @@ QUAL_COLS = ["uf", "setor_predominante", "porte"]
 # 1. QUANTITATIVA × QUANTITATIVA (correlação)
 # =========================================================================
 st.header("1. Correlação entre variáveis quantitativas")
-metodo = st.radio("Método", ["pearson", "spearman"], horizontal=True)
-corr = df[NUM_COLS].corr(method=metodo)
+
+col_m, col_l = st.columns([1, 2])
+metodo = col_m.radio("Método", ["pearson", "spearman"], horizontal=True)
+usar_log = col_l.checkbox(
+    "Aplicar transformação log1p antes de correlacionar (recomendado)",
+    value=True,
+    help="Variáveis monetárias brutas são fortemente assimétricas e dominadas por "
+         "Brasília. O log1p reduz o efeito de escala e revela relações estruturais "
+         "mais significativas.",
+)
+
+df_corr = np.log1p(df[NUM_COLS]) if usar_log else df[NUM_COLS]
+corr = df_corr.corr(method=metodo)
 
 fig = px.imshow(
     corr, text_auto=".2f", color_continuous_scale="RdBu_r",
     zmin=-1, zmax=1, aspect="auto",
-    title=f"Matriz de correlação ({metodo}) - RIDE-DF {ano}",
+    title=f"Matriz de correlação ({metodo}{'  |  log1p' if usar_log else ''}) - RIDE-DF {ano}",
 )
 st.plotly_chart(fig, use_container_width=True)
 
@@ -44,9 +55,29 @@ st.markdown(
 """
 )
 
+with st.expander("ℹ️ Por que as correlações nos valores brutos chegam a 0,99–1,00?"):
+    st.markdown(
+        """
+        Quando se aplica Pearson (ou Spearman) nos **valores absolutos em R\$ mil**,
+        duas fontes de distorção se combinam:
+
+        1. **Efeito de escala / tamanho:** municípios maiores tendem a ter valores altos
+           em *todos* os setores. Brasília, com economia ~200× maior que a média dos
+           demais, cria um ponto extremo que "puxa" os coeficientes para 1.
+        2. **Relações definitórias:** `vl_bruto_total` = agropecuária + indústria +
+           serviços + administração (por definição); `vl_pib` ≈ `vl_bruto_total` +
+           impostos − subsídios. Correlações próximas de 1 entre esses pares são
+           esperadas e não refletem uma relação causal ou estrutural.
+
+        A transformação **log1p** comprime a escala, reduz a influência de Brasília e
+        revela as correlações estruturais entre os setores — que é o que interessa
+        analiticamente.
+        """
+    )
+
 with st.expander("Scatter matrix (pares de variáveis)"):
     fig2 = px.scatter_matrix(
-        df, dimensions=NUM_COLS, color="uf",
+        df_corr.assign(uf=df["uf"]), dimensions=NUM_COLS, color="uf",
         height=900, title="Scatter matrix das variáveis quantitativas",
     )
     fig2.update_traces(diagonal_visible=False, showupperhalf=False)
