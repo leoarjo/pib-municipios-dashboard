@@ -39,8 +39,8 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.markdown(
     """
-> **Leitura:** valores próximos de 1 (azul escuro) ⇒ forte relação linear/monotônica
-> positiva; próximos de -1 (vermelho) ⇒ forte relação negativa.
+> **Leitura:** valores próximos de 1 (vermelho escuro) ⇒ forte relação linear/monotônica
+> positiva; próximos de -1 (azul escuro) ⇒ forte relação negativa.
 """
 )
 
