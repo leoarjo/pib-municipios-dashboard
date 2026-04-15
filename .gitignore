@@ -1,0 +1,31 @@
+# ---- Python ----
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ---- Streamlit secrets ----
+.streamlit/secrets.toml
+
+# ---- Editores / IDEs ----
+.vscode/
+.idea/
+.claude/
+
+# ---- Arquivos grandes / relatório (nao precisa no cloud) ----
+Relatorio/
+*.zip
+*.pdf
+
+# ---- Scripts auxiliares que nao precisam ir pra producao ----
+capturar_telas.py
+gerar_figuras.py
+gerar_tabelas_regressao.py
+otimizar_figuras.py
+explorar_modelos.py
+
+# ---- SO ----
+.DS_Store
+Thumbs.db
