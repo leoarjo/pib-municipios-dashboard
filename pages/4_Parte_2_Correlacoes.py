@@ -132,6 +132,15 @@ fig3 = px.box(df, x=ql, y=qt, color=ql, points="all",
               hover_data=["nome_municipio", "uf"])
 st.plotly_chart(fig3, use_container_width=True)
 
+if ql == "uf" and "DF" in df["uf"].values:
+    n_df = (df["uf"] == "DF").sum()
+    st.caption(
+        f"⚠️ **Atenção:** o Distrito Federal corresponde a **{n_df} município** "
+        "na RIDE-DF (Brasília). Um boxplot com n = 1 não tem dispersão — "
+        "o ponto exibido é apenas o valor único da observação, sem interpretação "
+        "de mediana, quartis ou outliers."
+    )
+
 st.markdown(
     """
 > Se **p < 0,05**, há evidência de que as médias da variável quantitativa

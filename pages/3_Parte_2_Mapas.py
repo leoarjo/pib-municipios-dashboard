@@ -8,6 +8,7 @@ from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
 
 from db import get_available_years, get_pib_ride, enriquecer_qualitativas
+from utils import fmt_brl_full, fmt_brl_reais
 
 st.set_page_config(page_title="Parte 2 - Mapas", page_icon="🗺️", layout="wide")
 st.title("🗺️ Parte 2 - Análises Territoriais")
@@ -71,11 +72,11 @@ for _, r in df.iterrows():
         <b>{r['nome_municipio']}</b> ({r['uf']})<br>
         Setor predominante: <b>{r['setor_predominante']}</b><br>
         Porte: <b>{r['porte']}</b><br><br>
-        VAB Agropecuária: R$ {r['vl_agropecuaria']:,.0f}<br>
-        VAB Indústria: R$ {r['vl_industria']:,.0f}<br>
-        VAB Serviços: R$ {r['vl_servicos']:,.0f}<br>
-        PIB: R$ {r['vl_pib']:,.0f}<br>
-        PIB per capita: R$ {r['vl_pib_per_capta']:,.2f}
+        VAB Agropecuária: {fmt_brl_full(r['vl_agropecuaria'])}<br>
+        VAB Indústria: {fmt_brl_full(r['vl_industria'])}<br>
+        VAB Serviços: {fmt_brl_full(r['vl_servicos'])}<br>
+        PIB: {fmt_brl_full(r['vl_pib'])}<br>
+        PIB per capita: {fmt_brl_reais(r['vl_pib_per_capta'])}
     """
     folium.CircleMarker(
         location=[r["latitude"], r["longitude"]],

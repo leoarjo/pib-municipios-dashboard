@@ -9,6 +9,7 @@ Estrutura:
 import streamlit as st
 
 from db import get_available_years, get_pib_ride, get_ride_df_municipios
+from utils import fmt_brl_mil
 
 st.set_page_config(
     page_title="PIB RIDE-DF - Trabalho A2",
@@ -85,8 +86,8 @@ with col2:
     st.metric("Registros carregados (ano)", len(df_ano))
 with col3:
     st.metric(
-        "Soma do VAB Agropecuária (R$ mil)",
-        f"{df_ano['vl_agropecuaria'].sum():,.0f}".replace(",", "."),
+        "Soma do VAB Agropecuária",
+        fmt_brl_mil(df_ano["vl_agropecuaria"].sum()),
     )
 
 st.divider()
